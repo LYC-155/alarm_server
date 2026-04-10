@@ -309,6 +309,17 @@ async def app_ws(websocket: WebSocket, device_id: str):
 
             try:
                 msg = json.loads(data)
+                msg_type = msg.get("type", "")
+
+                if msg_type == "heartbeat":
+                    await websocket.send_text(json.dumps({
+                        "type": "system",
+                        "device_id": device_id,
+                        "device_online": device_id in device_connections,
+                        "message": "heartbeat ok",
+                        "server_time": now_str()
+                    }, ensure_ascii=False))
+                    continue
             except json.JSONDecodeError:
                 msg = {"type": "raw", "content": data}
 
